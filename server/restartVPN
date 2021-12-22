@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+
+basic_path=$(find ~/ -type d -name "ipsec-l2tp")
+
+echo "$(date +%F) $(date +%T)" >> $basic_path/restart.log
+cd $basic_path/server
+docker-compose down
+docker-compose up -d 
+echo "restart done..." >> $basic_path/restart.log
+echo "-----------------------" >> $basic_path/restart.log
