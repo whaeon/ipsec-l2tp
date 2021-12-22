@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+
+dev_name=Privacy
+basic_path=$(find / -type d -name "ipsec-l2tp")
+log_path=$basic_path/client/reconnect.log
+ca_path=$basic_path/client/ca.pem
+
+echo "-----------------------------------------------" >> $log_path
+echo "$(date +%F) $(date +%T) log can write access..." >> $log_path
+echo "-----------------------------------------------" >> $log_path
+
+modifyMtu(){
+	nic_name=$(ifconfig | awk '{print $1}' | grep ppp | head -n 1 | awk -F ":" '{print $1}')
+	mtu=$(ifconfig $nic_name | awk '{print $4}' | head -n 1)
+	vpnserver=10.4.1.13
+
+	if [ $mtu != 1500 ];then
+        	echo "$(date +%F) $(date +%T) mtu is low,changing to 1500..." >> $log_path
+	        ifconfig $nic_name mtu 1500 up >> $log_path
+	        echo "$(date +%F) $(date +%T) modify vpn server mtu.." >> $log_path
+	        ssh -i $ca_path ubuntu@$vpnserver docker exec ipsec-vpn-server ip a s $nic_name >> $log_path
+	        ssh -i $ca_path ubuntu@$vpnserver docker exec ipsec-vpn-server ifconfig $nic_name mtu 1500 up >> $log_path
+        	ssh -i $ca_path ubuntu@$vpnserver docker exec ipsec-vpn-server ip a s $nic_name >> $log_path
+	fi
+}
+
+while true
+do
+	ifconfig ppp0 2> /dev/zero
+	if [ $? != 0 ];then
+		echo "$(date +%F) $(date +%T) start vpn..." >> $log_path
+		echo "" >> $log_path
+		nmcli connection up $dev_name >> $log_path
+		echo "the vpn had started..." >> $log_path
+		echo "-----------------------------------------------" >> $log_path
+		modifyMtu
+	else
+		modifyMtu
+		sleep 15
+	fi
+done

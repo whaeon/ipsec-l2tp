@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -x
+
+basic_path=$(find / -type d -name "ipsec-l2tp")
+dev_name=$(ifconfig | awk '{print $1}' | grep ppp | head -n 1 | awk -F ":" '{print $1}')
+mtu=$(ifconfig $dev_name | awk '{print $4}' | head -n 1)
+vpnserver=10.4.1.13
+log_path=$basic_path/client/reconnect.log
+ca_file=$basic_path/client/ca.pem
+
+if [ $mtu != 1500 ];then
+	echo "$(date +%F) $(date +%T) mtu is low,changing to 1500..." >> $log_path
+	ifconfig $dev_name mtu 1500 up >> $log_path
+	echo "$(date +%F) $(date +%T) modify vpn server mtu.." >> $log_path
+	ssh -i $ca_file ubuntu@$vpnserver docker exec ipsec-vpn-server ip a s $dev_name >> $log_path
+	ssh -i $ca_file ubuntu@$vpnserver docker exec ipsec-vpn-server ifconfig $dev_name mtu 1500 up >> $log_path
+	ssh -i $ca_file ubuntu@$vpnserver docker exec ipsec-vpn-server ip a s $dev_name >> $log_path
+fi
+
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=Listen vpn NIC and modify mtu
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/listen-vpn
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
