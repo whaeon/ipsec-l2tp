@@ -2,7 +2,7 @@
 
 
 dev_name=Privacy
-basic_path=$(find / -type d -name "ipsec-l2tp")
+basic_path=$(find /home -type d -name "ipsec-l2tp")
 log_path=$basic_path/client/reconnect.log
 ca_path=$basic_path/client/ca.pem
 
