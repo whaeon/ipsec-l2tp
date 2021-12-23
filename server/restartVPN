@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-basic_path=$(find / -type d -name "ipsec-l2tp")
+basic_path=$(find /home -type d -name "ipsec-l2tp")
 
 echo "$(date +%F) $(date +%T)" >> $basic_path/restart.log
 cd $basic_path/server
